@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Login{
+  id                        String @id @unique @default(uuid())
+  email                     String @unique
+  password                  String
+  user                      User?
+  createddAt                DateTime  @default(now()) 
+  updatedAt                 DateTime  @updatedAt 
+}
+model Role{
+  id                        String @id @unique @default(uuid())
+  type                      String @unique
+  user                      User[]
+  createddAt                DateTime  @default(now()) 
+  updatedAt                 DateTime  @updatedAt 
+}
+
+// info of admin, doctor and patient is  saved in same table
+model User{
+  id                        String @id @unique @default(uuid())
+  loginId                   String @unique
+  login                     Login   @relation(fields: [loginId],references: [id], onDelete: Cascade)
+  roleId                    String  
+  role                      Role @relation(fields: [roleId],references: [id])
+  fname                     String
+  mname                     String?
+  lname                     String
+  sex                       String
+  age                       Int
+  // dr
+  field                     String?
+  experience                String?
+  profilePic                String @default("")
+  days                      Day[]
+  // patient
+  address                   String?
+  phone                     String?
+  time                      Time[]
+  // verified                  Boolean @default(false)
+  createddAt                DateTime  @default(now()) 
+  updatedAt                 DateTime  @updatedAt 
+}
+
+model Day{
+  id                        String @id @unique @default(uuid())
+  valid                     Boolean   @default(true)
+  times                     Time[]
+  day                       String
+  // user is doctory 
+  userId                    String
+  user                      User @relation(fields: [userId],references: [id])
+  createddAt                DateTime  @default(now()) 
+  updatedAt                 DateTime  @updatedAt 
+}
+
+model Time{ 
+  id                        String @id @unique @default(uuid())
+  status                    String   @default("open")  //pending, booked, open
+  times                     String
+  dayId                     String
+  day                       Day @relation(fields: [dayId],references: [id])
+  userId                    String?
+  user                      User? @relation(fields: [userId],references: [id])
+  createddAt                DateTime  @default(now()) 
+  updatedAt                 DateTime  @updatedAt 
+}
